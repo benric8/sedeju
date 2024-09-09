@@ -1,0 +1,77 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+**/src/main/resources/*.properties
+**/src/main/resources/*.yml
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!.mvn/wrapper/maven-wrapper.properties
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+releases/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+*.swp
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.old
+
+# Compiled class files
+*.class
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# JBoss configuration and files
+standalone/tmp/
+standalone/log/
+standalone/data/
+standalone/deployments/
+jboss-modules.jar
+
+# Generated configuration
+target/configuration/
+target/*.war
