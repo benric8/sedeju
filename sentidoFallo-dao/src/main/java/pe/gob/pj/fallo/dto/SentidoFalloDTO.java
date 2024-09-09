@@ -208,6 +208,6 @@ public class SentidoFalloDTO implements Serializable {
 	}
 
 	public void setcDistrito(String cDistrito) {
-		this.cDistrito = cDistrito;
+		this.cDistrito = cDistrito.trim();
 	}
 }

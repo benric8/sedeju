@@ -6,8 +6,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.StoredProcedureQuery;
+import javax.persistence.TypedQuery;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -48,17 +51,22 @@ public class SentidoFalloDaoImpl implements SentidoFalloDao {
 	@Override
 	public List<SentidoFalloDTO> listaSentidosFallo(String cuo, String xFormato, String cTipoRecurso, Integer numRecurso, Integer anioRecurso, String cOrgano, Integer tipo) throws Exception {
 		List<SentidoFalloDTO> lista = new ArrayList<SentidoFalloDTO>();
-		try {
-			StoredProcedureQuery denunciaQuery = em.getCurrentSession().createNamedStoredProcedureQuery(MovSentidofallo.RECUPERAR_SENTIDO_FALLOS);
-			denunciaQuery.setParameter(MovSentidofallo.P_X_FORMATO, xFormato);
-			denunciaQuery.setParameter(MovSentidofallo.P_C_TIPO_RECURSO, ValidarUtil.isBlank(cTipoRecurso));
-			denunciaQuery.setParameter(MovSentidofallo.P_N_NUM_RECURSO, ValidarUtil.isCero(numRecurso));
-			denunciaQuery.setParameter(MovSentidofallo.P_N_ANIO_RECURSO, ValidarUtil.isCero(anioRecurso));
-			denunciaQuery.setParameter(MovSentidofallo.P_C_ORGANO, ValidarUtil.isBlank(cOrgano));
-			denunciaQuery.setParameter(MovSentidofallo.P_N_TIPO, ValidarUtil.isCero(tipo));
-			denunciaQuery.execute();
-			lista = denunciaQuery.getResultList();
-		} catch (Exception e) {
+
+		try{
+			StringBuilder stringQuery = new StringBuilder("SELECT se FROM MovSentidofallo as se");
+			stringQuery.append(" INNER JOIN se.movExpediente as ex");
+			stringQuery.append(" LEFT OUTER JOIN se.maeDistritosJudiciale as ds");
+			stringQuery.append(" WHERE se.lActivo = '1' AND ex.lActivo = '1'");
+
+			TypedQuery<MovSentidofallo> query = buildQuery(tipo, xFormato, cTipoRecurso, numRecurso, anioRecurso, cOrgano, stringQuery);
+
+			query.getResultStream().forEach(instanciaSentidoFallo -> {
+				if (instanciaSentidoFallo != null) {
+					SentidoFalloDTO dto = mapToSentidoFalloDTO(instanciaSentidoFallo);
+					lista.add(dto);
+				}
+			});
+		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return lista;
@@ -339,5 +347,73 @@ public class SentidoFalloDaoImpl implements SentidoFalloDao {
 		}
 		return lista;
 	}
-	
+
+	private TypedQuery<MovSentidofallo> buildQuery(Integer tipo, String xFormato, String cTipoRecurso, Integer numRecurso, Integer anioRecurso, String cOrgano, StringBuilder stringQuery) {
+		TypedQuery<MovSentidofallo> query;
+
+		if (tipo == 0) {
+			stringQuery.append(" AND ex.xFormato = :"+MovSentidofallo.P_X_FORMATO);
+			query = em.getCurrentSession().createQuery(stringQuery.toString(), MovSentidofallo.class);
+			query.setParameter(MovSentidofallo.P_X_FORMATO, xFormato);
+		} else {
+			stringQuery.append(" AND se.cTipoRecurso = :"+MovSentidofallo.P_C_TIPO_RECURSO);
+			stringQuery.append(" AND se.nNumeroRecurso = :"+MovSentidofallo.P_N_NUM_RECURSO);
+			stringQuery.append(" AND se.nAnioRecurso = :"+MovSentidofallo.P_N_ANIO_RECURSO);
+			stringQuery.append(" AND se.cOrgjurisd = :"+MovSentidofallo.P_C_ORGANO);
+			query = em.getCurrentSession().createQuery(stringQuery.toString(), MovSentidofallo.class);
+			query.setParameter(MovSentidofallo.P_C_TIPO_RECURSO, cTipoRecurso);
+			query.setParameter(MovSentidofallo.P_N_NUM_RECURSO, numRecurso);
+			query.setParameter(MovSentidofallo.P_N_ANIO_RECURSO, anioRecurso);
+			query.setParameter(MovSentidofallo.P_C_ORGANO, cOrgano);
+		}
+
+		return query;
+	}
+
+
+	private SentidoFalloDTO mapToSentidoFalloDTO(MovSentidofallo instanciaSentidoFallo) {
+		SentidoFalloDTO dto = new SentidoFalloDTO();
+
+		dto.setnExpediente(instanciaSentidoFallo.getMovExpediente().getNExpediente());
+		dto.setxFormato(instanciaSentidoFallo.getMovExpediente().getXFormato());
+		dto.setxNomDistrito(instanciaSentidoFallo.getMaeDistritosJudiciale().getX_nomDistrito());
+		dto.setxDescDistrito(instanciaSentidoFallo.getMaeDistritosJudiciale().getX_nomDistrito());
+		dto.setxDescrEspecialidad(instanciaSentidoFallo.getMovExpediente().getX_descEspecialidad());
+		dto.setnSentidoFallo(instanciaSentidoFallo.getN_sentidoFallo());
+		dto.setxDescSentido(instanciaSentidoFallo.getX_descSentido());
+		dto.setfSentidoFallo(instanciaSentidoFallo.getF_sentidoFallo());
+		dto.setfRegistro(instanciaSentidoFallo.getFRegistro());
+		dto.setxNomOrgJurisd(instanciaSentidoFallo.getX_nomOrgjurisd());
+		dto.setnSentidoFalloMagistrado(0);
+		dto.setnMagistradoSentido(0);
+
+		// Obtener magistrados
+		String magistrados = instanciaSentidoFallo.getMovMagistradoSentidofallos()
+				.stream().map(MovMagistradoSentidofallo::getX_nomMagistrado)
+				.collect(Collectors.joining(", "));
+		dto.setxNomMagistrado(magistrados);
+
+		dto.setxDescProceso(instanciaSentidoFallo.getMovExpediente().getX_descProceso());
+
+		// Establecer el recurso
+		dto.setxDescRecurso(obtenerDescripcionRecurso(instanciaSentidoFallo.getcTipoRecurso()));
+
+		dto.setnNumRecurso(instanciaSentidoFallo.getnNumeroRecurso());
+		dto.setnAnioRecurso(instanciaSentidoFallo.getnAnioRecurso() != null ? instanciaSentidoFallo.getnAnioRecurso().intValue() : null);
+		dto.setfFechaVisto(instanciaSentidoFallo.getfFechaVisto());
+		dto.setcDistrito(instanciaSentidoFallo.getMaeDistritosJudiciale().getC_distritoJudicial());
+
+		return dto;
+	}
+
+
+	private String obtenerDescripcionRecurso(String cTipoRecurso) {
+		StringBuilder sbTipoRecurso = new StringBuilder("SELECT m FROM MaeTipoRecurso m WHERE m.cTipoRecurso = :c_tipo_recurso AND m.lActivo = '1'");
+		TypedQuery<MaeTipoRecurso> qTipoRecurso = em.getCurrentSession().createQuery(sbTipoRecurso.toString(), MaeTipoRecurso.class);
+		qTipoRecurso.setParameter("c_tipo_recurso", cTipoRecurso);
+
+		MaeTipoRecurso maeTipoRecurso = qTipoRecurso.getResultStream().findFirst().orElse(null);
+		return maeTipoRecurso != null ? maeTipoRecurso.getxTipoRecurso() : "";
+	}
+
 }

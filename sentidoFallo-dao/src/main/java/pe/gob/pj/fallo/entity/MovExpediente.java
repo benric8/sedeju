@@ -17,8 +17,7 @@ import java.util.List;
 @NamedQuery(name=MovExpediente.BUSCAR_POR_CODIGO, query="SELECT m FROM MovExpediente m WHERE m.xFormato = :xFormato ")
 public class MovExpediente implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	public static final String RECUPERAR_SENTIDO_FALLOS = "recuperaSentidosFallos";
+
 	public static final String BUSCAR_POR_CODIGO = "buscarPorCodigo";
 	public static final String P_X_FORMATO = "xFormato";
 	

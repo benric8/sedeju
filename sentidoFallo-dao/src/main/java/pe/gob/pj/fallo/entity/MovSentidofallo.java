@@ -45,21 +45,6 @@ import java.util.List;
 	        )
 	    }
 	)
-@NamedStoredProcedureQuery(
-		name = MovSentidofallo.RECUPERAR_SENTIDO_FALLOS,
-		procedureName = "usrSentidoFallo.sp_consulta_sentidos",
-		resultSetMappings = {
-				"XInfoSProcMapping1"
-		},
-		parameters = {		   
-		   @StoredProcedureParameter(name = MovSentidofallo.P_X_FORMATO, type = String.class, mode = ParameterMode.IN ),
-		   @StoredProcedureParameter(name = MovSentidofallo.P_C_TIPO_RECURSO, type = String.class, mode = ParameterMode.IN ),
-		   @StoredProcedureParameter(name = MovSentidofallo.P_N_NUM_RECURSO, type = Integer.class, mode = ParameterMode.IN ),
-		   @StoredProcedureParameter(name = MovSentidofallo.P_N_ANIO_RECURSO, type = Integer.class, mode = ParameterMode.IN ),
-		   @StoredProcedureParameter(name = MovSentidofallo.P_C_ORGANO, type = String.class, mode = ParameterMode.IN ),
-		   @StoredProcedureParameter(name = MovSentidofallo.P_N_TIPO, type = Integer.class, mode = ParameterMode.IN ),
-	    }
-)
 @SqlResultSetMapping (
 	    name="infoReporteDetalleMapping",
 	    entities= {
@@ -107,14 +92,14 @@ import java.util.List;
 @NamedQuery(name=MovSentidofallo.RECUPERA_JUZGADOS_TODOS, query="SELECT m.x_nomOrgjurisd  FROM MovSentidofallo m WHERE m.maeDistritosJudiciale.c_distritoJudicial=:cDistrito AND m.lActivo = '1' GROUP BY m.x_nomOrgjurisd ")
 public class MovSentidofallo implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	public static final String RECUPERAR_SENTIDO_FALLOS = "recuperaSentidosFallos";
-	public static final String P_X_FORMATO = "@x_formato";
-	public static final String P_C_TIPO_RECURSO = "@c_tipo_recurso";
-	public static final String P_N_NUM_RECURSO = "@n_num_recurso";
-	public static final String P_N_ANIO_RECURSO = "@n_anio_recurso";
-	public static final String P_C_ORGANO = "@c_organo";
-	public static final String P_N_TIPO = "@n_tipo";
+
+	public static final String P_X_FORMATO = "x_formato";
+	public static final String P_C_TIPO_RECURSO = "c_tipo_recurso";
+	public static final String P_N_NUM_RECURSO = "n_num_recurso";
+	public static final String P_N_ANIO_RECURSO = "n_anio_recurso";
+	public static final String P_C_ORGANO = "c_organo";
+	public static final String P_C_ORGANO_SP = "@c_organo";
+	public static final String P_N_TIPO = "n_tipo";
 	public final static String P_CURSOR="p_resultado";
 	public static final String P_X_FORMATO_SIN = "xFormato";
 	
@@ -185,7 +170,10 @@ public class MovSentidofallo implements Serializable {
 	private Integer nNumeroRecurso;
 	
 	@Column(name="n_anioRecurso")
-	private Long nAnioRecurso;
+	private Integer nAnioRecurso;
+
+	@Column(name = "f_fechaVisto")
+	private Timestamp fFechaVisto;
 
 	//bi-directional many-to-one association to MovMagistradoSentidofallo
 	@OneToMany(mappedBy="movSentidofallo")
@@ -399,11 +387,20 @@ public class MovSentidofallo implements Serializable {
 		this.nNumeroRecurso = nNumeroRecurso;
 	}
 
-	public Long getnAnioRecurso() {
+	public Integer getnAnioRecurso() {
 		return nAnioRecurso;
 	}
 
-	public void setnAnioRecurso(Long nAnioRecurso) {
+	public void setnAnioRecurso(Integer nAnioRecurso) {
 		this.nAnioRecurso = nAnioRecurso;
 	}
+
+	public Timestamp getfFechaVisto() {
+		return fFechaVisto;
+	}
+
+	public void setfFechaVisto(Timestamp fFechaVisto) {
+		this.fFechaVisto = fFechaVisto;
+	}
+
 }
