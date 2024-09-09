@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+	<persistence-unit name="sentidoFallo-dao">
+		<class>pe.gob.pj.fallo.entity.MaeDistritosJudiciale</class>
+		<class>pe.gob.pj.fallo.entity.MaePerfil</class>
+		<class>pe.gob.pj.fallo.entity.MaeUsuario</class>
+		<class>pe.gob.pj.fallo.entity.MovExpediente</class>
+		<class>pe.gob.pj.fallo.entity.MovMagistradoSentidofallo</class>
+		<class>pe.gob.pj.fallo.entity.MovSentidofallo</class>
+		<class>pe.gob.pj.fallo.entity.Role</class>
+		<class>pe.gob.pj.fallo.entity.User</class>
+	</persistence-unit>
+</persistence>
