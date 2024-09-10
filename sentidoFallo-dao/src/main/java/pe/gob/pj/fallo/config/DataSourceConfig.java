@@ -98,7 +98,7 @@ public class DataSourceConfig {
 	private static Properties getHibernateProperties() {
 		Properties hibernateProperties = new Properties();
 		hibernateProperties.put("hibernate.dialect", "org.hibernate.dialect.SybaseDialect");
-		hibernateProperties.put("hibernate.show_sql", true);
+		hibernateProperties.put("hibernate.show_sql", false);
 		// other properties
 		return hibernateProperties;
 	}
